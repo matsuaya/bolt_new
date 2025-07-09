@@ -67,8 +67,9 @@ const ScheduleViewer: React.FC = () => {
       
       const date = String(row[dateKey]).trim();
       
-      // Get location from 施策名
+      // Get location from 施策名 and category from プロモ内容
       const location = row['施策名'] ? String(row['施策名']).trim() : '';
+      const category = row['プロモ内容'] ? String(row['プロモ内容']).trim() : '';
       if (!location) return;
       
       const participants: string[] = [];
@@ -94,7 +95,8 @@ const ScheduleViewer: React.FC = () => {
           schedule[person] = {};
           days.forEach(day => schedule[person][day] = '');
         }
-        schedule[person][date] = location;
+        // Store both location and category for display
+        schedule[person][date] = `${location}|${category}`;
       });
     });
     
@@ -136,18 +138,30 @@ const ScheduleViewer: React.FC = () => {
   const getCellStyle = (content: string) => {
     if (!content) return '';
     
+    // Extract category from content (format: "location|category")
+    const category = content.includes('|') ? content.split('|')[1] : '';
+    
     const colorMap: { [key: string]: string } = {
       'PL': 'bg-purple-100 text-purple-800',
+      '委託': 'bg-yellow-100 text-yellow-800',
+      '通常': 'bg-gray-100 text-gray-800',
       'プロジェクト': 'bg-blue-100 text-blue-800',
       'イベント': 'bg-green-100 text-green-800',
       'ワークショップ': 'bg-orange-100 text-orange-800',
       'セミナー': 'bg-red-100 text-red-800',
-      '委託': 'bg-yellow-100 text-yellow-800',
-      '通常': 'bg-gray-100 text-gray-800',
+      '博報堂': 'bg-indigo-100 text-indigo-800',
+      '博報堂_委託': 'bg-pink-100 text-pink-800',
     };
     
+    // First check category for exact match
+    if (category && colorMap[category]) {
+      return colorMap[category];
+    }
+    
+    // Fallback to checking content for partial matches
+    const location = content.includes('|') ? content.split('|')[0] : content;
     for (const [key, color] of Object.entries(colorMap)) {
-      if (content.includes(key)) return color;
+      if (location.includes(key)) return color;
     }
     
     return 'bg-gray-100 text-gray-800';
@@ -254,12 +268,14 @@ const ScheduleViewer: React.FC = () => {
                     </td>
                     {days.map(day => {
                       const content = personSchedule[person][day] || '';
+                      // Extract location for display (remove category part)
+                      const displayContent = content.includes('|') ? content.split('|')[0] : content;
                       return (
                         <td key={`${person}-${day}`} className="px-4 py-4 text-center">
-                          {content && (
+                          {displayContent && (
                             <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getCellStyle(content)}`}>
                               <MapPin className="w-3 h-3" />
-                              {content}
+                              {displayContent}
                             </div>
                           )}
                         </td>
@@ -292,24 +308,20 @@ const ScheduleViewer: React.FC = () => {
                 <span>PL</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-blue-100"></div>
-                <span>プロジェクト</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-green-100"></div>
-                <span>イベント</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-orange-100"></div>
-                <span>ワークショップ</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
                 <div className="w-3 h-3 rounded-full bg-yellow-100"></div>
                 <span>委託</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <div className="w-3 h-3 rounded-full bg-gray-100"></div>
                 <span>通常</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-indigo-100"></div>
+                <span>博報堂</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-pink-100"></div>
+                <span>博報堂_委託</span>
               </div>
             </div>
           </div>
