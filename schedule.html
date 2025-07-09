@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スケジュールビュー</title>
+    <link rel="stylesheet" href="schedule.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="title-section">
+                    <div class="calendar-icon">📅</div>
+                    <h1>スケジュールビュー</h1>
+                </div>
+                
+                <div class="month-navigation">
+                    <button class="nav-btn" onclick="navigateMonth('prev')">‹</button>
+                    <div class="month-display">
+                        <span id="currentMonth">2024年 7月</span>
+                    </div>
+                    <button class="nav-btn" onclick="navigateMonth('next')">›</button>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="スタッフ名で検索..." onkeyup="filterTable()">
+                </div>
+                
+                <div class="filter-container">
+                    <select id="personFilter" onchange="filterTable()">
+                        <option value="">全員表示</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Table -->
+        <div class="table-container">
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th class="name-column">
+                            <div class="header-content">
+                                👥 スタッフ名
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary">
+            <div class="summary-stats">
+                <div class="stat">
+                    <div class="stat-number" id="staffCount">0</div>
+                    <div class="stat-label">スタッフ数</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="scheduleCount">0</div>
+                    <div class="stat-label">予定数</div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color project"></div>
+                    <span>プロジェクト</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color event"></div>
+                    <span>イベント</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color workshop"></div>
+                    <span>ワークショップ</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seminar"></div>
+                    <span>セミナー</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="schedule.js"></script>
+</body>
+</html>
