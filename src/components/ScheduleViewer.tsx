@@ -6,6 +6,10 @@ interface CSVRow {
   [key: string]: string;
 }
 
+interface StaffInfo {
+  [key: string]: string;
+}
+
 interface PersonSchedule {
   [person: string]: {
     [date: string]: string;
@@ -18,35 +22,60 @@ const ScheduleViewer: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(7);
   const [currentYear, setCurrentYear] = useState(2025);
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
+  const [staffData, setStaffData] = useState<StaffInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load CSV data
+  // Load CSV data and staff info
   useEffect(() => {
-    const loadCSVData = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/schedule-data.csv');
-        const csvText = await response.text();
+        // Load schedule data
+        const scheduleResponse = await fetch('/schedule-data.csv');
+        const scheduleText = await scheduleResponse.text();
         
-        Papa.parse(csvText, {
+        Papa.parse(scheduleText, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
             setCsvData(results.data as CSVRow[]);
-            setLoading(false);
           },
           error: (error) => {
             console.error('Error parsing CSV:', error);
+          }
+        });
+
+        // Load staff info
+        const staffResponse = await fetch('/src/data/スタッフ情報.csv');
+        const staffText = await staffResponse.text();
+        
+        Papa.parse(staffText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            setStaffData(results.data as StaffInfo[]);
+            setLoading(false);
+          },
+          error: (error) => {
+            console.error('Error parsing staff CSV:', error);
             setLoading(false);
           }
         });
       } catch (error) {
-        console.error('Error loading CSV:', error);
+        console.error('Error loading data:', error);
         setLoading(false);
       }
     };
 
-    loadCSVData();
+    loadData();
   }, []);
+
+  // Get staff names from staff info CSV
+  const staffNames = useMemo(() => {
+    return staffData
+      .map(staff => staff['氏名'])
+      .filter(name => name && name.trim() !== '')
+      .sort();
+  }, [staffData]);
 
   // Generate days for the current month
   const days = useMemo(() => {
@@ -105,12 +134,12 @@ const ScheduleViewer: React.FC = () => {
 
   // Get unique people and filter based on search
   const people = useMemo(() => {
-    const allPeople = Object.keys(personSchedule);
-    return allPeople.filter(person => 
+    // Only show staff names that exist in staff info CSV
+    return staffNames.filter(person => 
       person.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedPerson === '' || person === selectedPerson)
     );
-  }, [personSchedule, searchTerm, selectedPerson]);
+  }, [staffNames, searchTerm, selectedPerson]);
 
   const monthNames = [
     '1月', '2月', '3月', '4月', '5月', '6月',
@@ -228,7 +257,7 @@ const ScheduleViewer: React.FC = () => {
                 className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white min-w-[200px]"
               >
                 <option value="">全員表示</option>
-                {Object.keys(personSchedule).map(person => (
+                {staffNames.map(person => (
                   <option key={person} value={person}>{person}</option>
                 ))}
               </select>
