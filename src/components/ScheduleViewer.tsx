@@ -291,7 +291,7 @@ const ScheduleViewer: React.FC = () => {
                       {person}
                     </td>
                     {days.map(day => {
-                      const content = personSchedule[person][day] || '';
+                      const content = personSchedule[person]?.[day] || '';
                       // Extract location for display (remove category part)
                       const displayContent = content.includes('|') ? content.split('|')[0] : content;
                       return (
