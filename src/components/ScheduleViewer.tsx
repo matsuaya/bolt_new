@@ -30,7 +30,7 @@ const ScheduleViewer: React.FC = () => {
     const loadData = async () => {
       try {
         // Load schedule data
-        const scheduleResponse = await fetch('/schedule-data.csv');
+        const scheduleResponse = await fetch('/schedule_2025_07.csv');
         const scheduleText = await scheduleResponse.text();
         
         Papa.parse(scheduleText, {
@@ -45,7 +45,7 @@ const ScheduleViewer: React.FC = () => {
         });
 
         // Load staff info
-        const staffResponse = await fetch('/src/data/スタッフ情報.csv');
+        const staffResponse = await fetch('/スタッフ情報.csv');
         const staffText = await staffResponse.text();
         
         Papa.parse(staffText, {
@@ -77,10 +77,16 @@ const ScheduleViewer: React.FC = () => {
       .sort();
   }, [staffData]);
 
-  // Generate days for the current month
+  // Generate days for the current month with day of week
   const days = useMemo(() => {
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, i) => `${currentMonth}/${i + 1}`);
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+    
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const date = new Date(currentYear, currentMonth - 1, i + 1);
+      const dayOfWeek = dayNames[date.getDay()];
+      return `${String(currentMonth).padStart(2, '0')}/${String(i + 1).padStart(2, '0')}(${dayOfWeek})`;
+    });
   }, [currentMonth, currentYear]);
 
   // Process schedule data from CSV
@@ -94,7 +100,19 @@ const ScheduleViewer: React.FC = () => {
       const dateKey = Object.keys(row).find(k => k.includes('開催日'));
       if (!dateKey || !row[dateKey]) return;
       
-      const date = String(row[dateKey]).trim();
+      let date = String(row[dateKey]).trim();
+      
+      // Convert date format from "07/01(火)" to "07/01(火)" (already in correct format)
+      // If date is in format "7/1", convert to "07/01(火)"
+      if (date.match(/^\d{1,2}\/\d{1,2}$/)) {
+        const [month, day] = date.split('/');
+        const paddedMonth = month.padStart(2, '0');
+        const paddedDay = day.padStart(2, '0');
+        const dateObj = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayOfWeek = dayNames[dateObj.getDay()];
+        date = `${paddedMonth}/${paddedDay}(${dayOfWeek})`;
+      }
       
       // Get location from 施策名 and category from プロモ内容
       const location = row['施策名'] ? String(row['施策名']).trim() : '';
