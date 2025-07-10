@@ -16,7 +16,7 @@ const ScheduleViewer: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPerson, setSelectedPerson] = useState('');
   const [currentMonth, setCurrentMonth] = useState(7);
-  const [currentYear, setCurrentYear] = useState(2024);
+  const [currentYear, setCurrentYear] = useState(2025);
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
   const [loading, setLoading] = useState(true);
 
