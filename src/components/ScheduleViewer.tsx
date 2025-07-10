@@ -259,12 +259,7 @@ const ScheduleViewer: React.FC = () => {
                 {people.map((person, index) => (
                   <tr key={person} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="sticky left-0 px-6 py-4 font-medium text-gray-900 bg-inherit border-r border-gray-200 z-10">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                          {person.charAt(0)}
-                        </div>
-                        {person}
-                      </div>
+                      {person}
                     </td>
                     {days.map(day => {
                       const content = personSchedule[person][day] || '';
