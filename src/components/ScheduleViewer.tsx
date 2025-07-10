@@ -134,12 +134,14 @@ const ScheduleViewer: React.FC = () => {
 
   // Get unique people and filter based on search
   const people = useMemo(() => {
-    // Only show staff names that exist in staff info CSV
-    return staffNames.filter(person => 
+    // Only show people who have schedules AND exist in staff info CSV
+    const peopleWithSchedules = Object.keys(personSchedule);
+    return peopleWithSchedules.filter(person => 
+      staffNames.includes(person) &&
       person.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedPerson === '' || person === selectedPerson)
     );
-  }, [staffNames, searchTerm, selectedPerson]);
+  }, [personSchedule, staffNames, searchTerm, selectedPerson]);
 
   const monthNames = [
     '1月', '2月', '3月', '4月', '5月', '6月',
