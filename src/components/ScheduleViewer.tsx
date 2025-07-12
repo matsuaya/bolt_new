@@ -20,7 +20,7 @@ const ScheduleViewer: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPerson, setSelectedPerson] = useState('');
   const [currentMonth, setCurrentMonth] = useState(7);
-  const [currentYear, setCurrentYear] = useState(2025);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
   const [staffData, setStaffData] = useState<StaffInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +28,16 @@ const ScheduleViewer: React.FC = () => {
   // Load CSV data and staff info
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
-        // Load schedule data
-        const scheduleResponse = await fetch('/schedule_2025_07.csv');
+        // Load schedule data based on current year and month
+        const scheduleFileName = `schedule_${currentYear}_${String(currentMonth).padStart(2, '0')}.csv`;
+        const scheduleResponse = await fetch(`/${scheduleFileName}`);
+        
+        if (!scheduleResponse.ok) {
+          console.warn(`Schedule file ${scheduleFileName} not found`);
+          setCsvData([]);
+        } else {
         const scheduleText = await scheduleResponse.text();
         
         Papa.parse(scheduleText, {
@@ -41,10 +48,12 @@ const ScheduleViewer: React.FC = () => {
           },
           error: (error) => {
             console.error('Error parsing CSV:', error);
+            setCsvData([]);
           }
         });
+        }
 
-        // Load staff info
+        // Load staff info (this doesn't change with month/year)
         const staffResponse = await fetch('/スタッフ情報.csv');
         const staffText = await staffResponse.text();
         
@@ -67,7 +76,7 @@ const ScheduleViewer: React.FC = () => {
     };
 
     loadData();
-  }, []);
+  }, [currentMonth, currentYear]);
 
   // Get staff names from staff info CSV
   const staffNames = useMemo(() => {
@@ -76,6 +85,13 @@ const ScheduleViewer: React.FC = () => {
       .filter(name => name && name.trim() !== '')
       .sort();
   }, [staffData]);
+
+  // Initialize current month to today's month
+  useEffect(() => {
+    const today = new Date();
+    setCurrentMonth(today.getMonth() + 1);
+    setCurrentYear(today.getFullYear());
+  }, []);
 
   // Generate days for the current month with day of week
   const days = useMemo(() => {
